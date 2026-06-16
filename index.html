@@ -36,60 +36,7 @@
 
 </div>
 
-<script>
-let usuario = null;
-
-function login() {
-  const nombre = document.getElementById("nombre").value.trim();
-  if (!nombre) return alert("Ingrese nombre");
-
-  usuario = nombre;
-  localStorage.setItem("usuario", nombre);
-
-  document.getElementById("login").style.display = "none";
-  document.getElementById("app").classList.remove("hidden");
-}
-
-window.onload = () => {
-  const u = localStorage.getItem("usuario");
-  if (u) {
-    usuario = u;
-    document.getElementById("login").style.display = "none";
-    document.getElementById("app").classList.remove("hidden");
-  }
-};
-
-function guardar() {
-  const data = {
-    usuario,
-    direccion: document.getElementById("direccion").value,
-    narracion: document.getElementById("narracion").value,
-    fecha: new Date().toLocaleString()
-  };
-
-  let arr = JSON.parse(localStorage.getItem("reportes")) || [];
-  arr.push(data);
-  localStorage.setItem("reportes", JSON.stringify(arr));
-
-  alert("Guardado");
-}
-
-function pdf() {
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF();
-
-  const direccion = document.getElementById("direccion").value;
-  const narracion = document.getElementById("narracion").value;
-
-  doc.text("REPORTE SIAP", 10, 10);
-  doc.text("Usuario: " + usuario, 10, 20);
-  doc.text("Dirección: " + direccion, 10, 30);
-  doc.text("Narración:", 10, 40);
-  doc.text(narracion, 10, 50);
-
-  doc.save("reporte.pdf");
-}
-</script>
+<script src="script.js"></script>
 
 </body>
 </html>
