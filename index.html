@@ -3,40 +3,852 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>SIAP - Reportes</title>
-
-<script src="https://cdn.tailwindcss.com"></script>
+<title>Registro Vehicular</title>
+<link rel="icon" type="image/jpeg" href="data:image/jpeg;base64,FAVICON_PLACEHOLDER">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@400;600;700&family=IBM+Plex+Sans:wght@300;400;600&display=swap');
+ 
+:root {
+  --gold: #C9A84C;
+  --gold2: #E8C96A;
+  --gold-dk: #8B6914;
+  --black: #141414;
+  --dark: #1E1E1E;
+  --mid: #2A2A2A;
+  --surface: #F7F3EC;
+  --surface2: #EDE7D7;
+  --border: rgba(201,168,76,0.35);
+  --red: #C0392B;
+}
+ 
+* { box-sizing: border-box; margin: 0; padding: 0; }
+ 
+body {
+  font-family: 'IBM Plex Sans', sans-serif;
+  background: #F0EBE0;
+  min-height: 100vh;
+}
+ 
+/* ── TOPBAR ── */
+.topbar {
+  background: var(--black);
+  border-bottom: 3px solid var(--gold);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.topbar img { width: 56px; height: 56px; object-fit: contain; flex-shrink: 0; }
+.topbar-info h1 {
+  font-family: 'Oswald', sans-serif;
+  color: var(--gold);
+  font-size: 1.05rem;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+}
+.topbar-info p {
+  color: #9A7D3A;
+  font-size: 0.7rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+ 
+/* ── MAIN ── */
+.wrap { max-width: 900px; margin: 0 auto; padding: 28px 20px 80px; }
+ 
+/* ── AGENT CARD ── */
+.agent-card {
+  background: var(--black);
+  border: 1px solid var(--gold);
+  border-radius: 6px;
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 20px;
+}
+.agent-card label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  letter-spacing: 2px;
+  color: var(--gold);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 5px;
+}
+.agent-card input {
+  background: #2A2A2A;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.95rem;
+  color: #fff;
+  width: 280px;
+  transition: border-color .2s;
+}
+.agent-card input:focus { outline: none; border-color: var(--gold); }
+.date-chip {
+  background: #2A2A2A;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 8px 14px;
+  color: var(--gold2);
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+.agent-card .sep { width: 1px; height: 40px; background: #333; }
+ 
+/* ── PASTE ZONE ── */
+.paste-card {
+  background: white;
+  border: 2px dashed var(--gold);
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.paste-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 14px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.paste-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: 1rem;
+  color: var(--gold-dk);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+.col-hint {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 14px;
+  font-size: 0.72rem;
+  color: #5A4A2A;
+  line-height: 1.8;
+}
+.col-hint strong { color: var(--gold-dk); font-weight: 600; }
+.col-hint .cols {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 4px;
+}
+.col-tag {
+  background: var(--gold-dk);
+  color: white;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+ 
+.paste-area {
+  width: 100%;
+  min-height: 90px;
+  background: #FAFAFA;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 12px;
+  font-family: 'IBM Plex Sans', monospace;
+  font-size: 0.85rem;
+  color: #333;
+  resize: vertical;
+  transition: border-color .2s;
+}
+.paste-area:focus { outline: none; border-color: var(--gold); }
+.paste-area::placeholder { color: #aaa; font-style: italic; }
+ 
+.btn-parse {
+  margin-top: 12px;
+  padding: 10px 28px;
+  background: var(--gold-dk);
+  border: none;
+  border-radius: 4px;
+  color: white;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: background .2s;
+}
+.btn-parse:hover { background: var(--gold); color: var(--black); }
+ 
+/* ── VEHICLE ROWS ── */
+.vehicles-section { display: flex; flex-direction: column; gap: 14px; margin-bottom: 24px; }
+ 
+.vehicle-row {
+  background: white;
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--gold);
+  border-radius: 4px;
+  padding: 14px 16px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: start;
+  animation: fadeIn .25s ease;
+}
+@keyframes fadeIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
+ 
+.vehicle-left { flex: 1; }
+ 
+.v-num-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.v-num {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.78rem;
+  letter-spacing: 2px;
+  color: var(--gold-dk);
+  text-transform: uppercase;
+}
+ 
+/* Editable field grid */
+.fields-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px 14px;
+}
+.fields-grid .wide { grid-column: 1 / -1; }
+ 
+.field-wrap label {
+  font-size: 0.63rem;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #7A6030;
+  display: block;
+  margin-bottom: 3px;
+}
+.field-wrap input {
+  width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  padding: 6px 10px;
+  font-family: 'IBM Plex Sans', sans-serif;
+  font-size: 0.88rem;
+  color: #222;
+  background: #FAFAFA;
+  transition: border-color .2s, background .2s;
+}
+.field-wrap input:focus { outline: none; border-color: var(--gold); background: #fff; }
+ 
+/* Photo zone */
+.photo-zone {
+  width: 160px;
+  flex-shrink: 0;
+}
+.photo-drop {
+  width: 160px;
+  height: 120px;
+  border: 2px dashed #C9A84C88;
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all .2s;
+  background: #FDFAF4;
+  overflow: hidden;
+  position: relative;
+}
+.photo-drop:hover { border-color: var(--gold); background: #FFF9EE; }
+.photo-drop img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.photo-drop .icon { font-size: 1.6rem; }
+.photo-drop .hint { font-size: 0.68rem; color: #9A7D3A; margin-top: 4px; text-align: center; letter-spacing: 0.3px; }
+.photo-drop input { display: none; }
+.photo-clear {
+  margin-top: 4px;
+  width: 100%;
+  padding: 4px;
+  background: none;
+  border: 1px solid #ddd;
+  border-radius: 3px;
+  font-size: 0.68rem;
+  color: var(--red);
+  cursor: pointer;
+  font-family: 'IBM Plex Sans', sans-serif;
+  display: none;
+}
+.photo-clear.show { display: block; }
+ 
+/* Remove btn */
+.btn-rm {
+  background: none;
+  border: none;
+  color: #ccc;
+  font-size: 1rem;
+  cursor: pointer;
+  padding: 2px 6px;
+  border-radius: 3px;
+  transition: all .2s;
+  font-family: 'IBM Plex Sans', sans-serif;
+}
+.btn-rm:hover { background: #fee; color: var(--red); }
+ 
+/* ── ADD MANUAL ── */
+.btn-add-manual {
+  width: 100%;
+  padding: 12px;
+  background: transparent;
+  border: 1.5px dashed var(--gold);
+  color: var(--gold-dk);
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 2px;
+  cursor: pointer;
+  border-radius: 4px;
+  transition: all .2s;
+  margin-bottom: 20px;
+}
+.btn-add-manual:hover { background: var(--gold); color: var(--black); border-style: solid; }
+ 
+/* ── GENERATE PDF ── */
+.btn-pdf {
+  width: 100%;
+  padding: 16px;
+  background: linear-gradient(90deg, var(--gold-dk), var(--gold), var(--gold-dk));
+  border: none;
+  border-radius: 5px;
+  color: var(--black);
+  font-family: 'Oswald', sans-serif;
+  font-size: 1.05rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 20px rgba(201,168,76,.3);
+  transition: all .2s;
+}
+.btn-pdf:hover { transform: translateY(-1px); box-shadow: 0 6px 28px rgba(201,168,76,.45); }
+.btn-pdf:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+ 
+/* ── COUNTER ── */
+.counter {
+  text-align: right;
+  font-size: 0.72rem;
+  color: var(--gold-dk);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+ 
+/* ── TOAST ── */
+.toast {
+  position: fixed; bottom: 24px; right: 24px;
+  background: var(--gold); color: var(--black);
+  padding: 12px 22px; border-radius: 5px;
+  font-family: 'Oswald', sans-serif; letter-spacing: 1.5px; font-size: 0.88rem;
+  opacity: 0; transform: translateY(8px);
+  transition: all .3s; z-index: 999; pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+ 
+/* error highlight */
+.err input { border-color: var(--red) !important; }
+ 
+@media(max-width:620px) {
+  .vehicle-row { grid-template-columns: 1fr; }
+  .photo-zone { width: 100%; }
+  .photo-drop { width: 100%; height: 100px; }
+  .fields-grid { grid-template-columns: 1fr 1fr; }
+}
+</style>
 </head>
-
-<body class="bg-gray-900 text-white">
-
-<!-- LOGIN -->
-<div id="login" class="flex items-center justify-center h-screen">
-  <div class="bg-gray-800 p-6 rounded-xl w-80">
-    <h2 class="text-lg mb-4">Ingreso</h2>
-    <input id="nombre" placeholder="Nombre" class="w-full p-2 mb-3 text-black">
-    <button onclick="login()" class="w-full bg-blue-600 p-2 rounded">Entrar</button>
+<body>
+ 
+<div class="topbar">
+  <img id="shield" src="" alt="Escudo">
+  <div class="topbar-info">
+    <h1>Dirección Nacional de Aviación de la Policía Nacional</h1>
+    <p>Departamento de Operaciones Policiales e Información</p>
   </div>
 </div>
-
-<!-- APP -->
-<div id="app" class="hidden p-4">
-
-<h1 class="text-xl mb-4">Sistema de Reportes</h1>
-
-<input id="direccion" placeholder="Dirección" class="w-full p-2 mb-2 text-black">
-<textarea id="narracion" placeholder="Narración" class="w-full p-2 mb-2 text-black"></textarea>
-
-<div class="flex gap-2">
-  <button onclick="guardar()" class="bg-blue-600 px-4 py-2 rounded">Guardar</button>
-  <button onclick="pdf()" class="bg-red-600 px-4 py-2 rounded">PDF</button>
+ 
+<div class="wrap">
+ 
+  <!-- AGENT -->
+  <div class="agent-card">
+    <div>
+      <label>Informe generado por</label>
+      <input type="text" id="agente" placeholder="Nombre del funcionario…" autocomplete="off">
+    </div>
+    <div class="sep"></div>
+    <div>
+      <label>Fecha</label>
+      <div class="date-chip" id="fecha-chip"></div>
+    </div>
+  </div>
+ 
+  <!-- PASTE ZONE -->
+  <div class="paste-card">
+    <div class="paste-header">
+      <div>
+        <div class="paste-title">📋 Pegar desde Excel o escribir manualmente</div>
+        <div style="font-size:.75rem;color:#777;margin-top:4px;">Copiá filas del Excel y pegá, o escribí directamente. Cada fila = un vehículo.</div>
+      </div>
+        <div class="col-hint">
+        <strong>Columnas del Excel (4 campos):</strong>
+        <div class="cols">
+          <span class="col-tag">A — Requisitoria</span>
+          <span class="col-tag">B — Marca</span>
+          <span class="col-tag">C — Modelo</span>
+          <span class="col-tag">D — Matrícula</span>
+          <span class="col-tag">E — Color</span>
+        </div>
+        <div style="margin-top:6px;font-size:0.68rem;color:#8B6914;">⚠ El lugar del hecho se completa manualmente en cada vehículo.</div>
+      </div>
+    </div>
+    <textarea class="paste-area" id="paste-area"
+      placeholder="Pegá desde Excel (Ctrl+V) o escribí manualmente separando con Tab:&#10;REQ-001 [Tab] Toyota [Tab] Corolla [Tab] ABC-123&#10;&#10;El lugar del hecho se completa a mano en cada vehículo."></textarea>
+    <button class="btn-parse" onclick="parseExcel()">↩ Cargar vehículos</button>
+  </div>
+ 
+  <!-- VEHICLE LIST -->
+  <div id="vehicles" class="vehicles-section"></div>
+ 
+  <div class="counter" id="counter" style="display:none"></div>
+  <button class="btn-add-manual" id="btn-add" onclick="addRow()">+ Agregar vehículo manualmente</button>
+ 
+  <button class="btn-pdf" id="btn-pdf" onclick="generatePDF()">⬇ Generar PDF</button>
 </div>
-
-</div>
-
-<script src="script.js"></script>
-
+ 
+<div class="toast" id="toast"></div>
+ 
+<footer class="app-footer">
+  <span class="footer-dot">◆</span>
+  <span>Información: Derechos Reservados — Técnico Programador <strong>Gerardo Volonté</strong></span>
+  <span class="footer-dot">◆</span>
+</footer>
+ 
+<style>
+.app-footer {
+  text-align: center;
+  padding: 18px 20px;
+  background: var(--black);
+  border-top: 1px solid var(--gold);
+  color: #7A6030;
+  font-size: 0.72rem;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.app-footer strong { color: var(--gold); font-weight: 600; }
+.footer-dot { color: var(--gold); font-size: 0.5rem; }
+</style>
+ 
+<script>
+const SHIELD = '[BASE64_ESCUDO_TOPBAR]';
+const SHIELD_PDF = '[BASE64_ESCUDO_PDF]';
+document.getElementById('shield').src = 'data:image/png;base64,' + SHIELD;
+ 
+const today = new Date();
+const dateLabel = today.toLocaleDateString('es-AR',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+const dateFile  = today.toLocaleDateString('es-AR').replace(/\//g,'-');
+document.getElementById('fecha-chip').textContent = dateLabel;
+ 
+let rows = [];
+let uid = 0;
+ 
+/* ── PARSE EXCEL PASTE ── */
+function parseExcel() {
+  const raw = document.getElementById('paste-area').value.trim();
+  if (!raw) { toast('⚠ Pegá datos antes de cargar'); return; }
+ 
+  const lines = raw.split('\n').filter(l => l.trim());
+  let added = 0;
+ 
+  for (const line of lines) {
+    if (rows.length >= 20) { toast('⚠ Máximo 20 vehículos'); break; }
+    const cols = line.split('\t').map(c => c.trim());
+    addRow({
+      req:      cols[0] || '',
+      marca:    cols[1] || '',
+      modelo:   cols[2] || '',
+      matricula:cols[3] || '',
+      color:    cols[4] || '',
+      lugar:    ''
+    });
+    added++;
+  }
+ 
+  document.getElementById('paste-area').value = '';
+  if (added) toast(`✔ ${added} vehículo(s) cargado(s)`);
+}
+ 
+/* ── ADD ROW ── */
+function addRow(data = {}) {
+  if (rows.length >= 20) { toast('⚠ Máximo 20 vehículos'); return; }
+  const id = ++uid;
+  rows.push({ id, photo: null });
+ 
+  const container = document.getElementById('vehicles');
+  const div = document.createElement('div');
+  div.className = 'vehicle-row';
+  div.id = `row-${id}`;
+  div.innerHTML = `
+    <div class="vehicle-left">
+      <div class="v-num-bar">
+        <span class="v-num" id="vnum-${id}">Vehículo #${rows.length}</span>
+        <button class="btn-rm" onclick="removeRow(${id})" title="Quitar">✕</button>
+      </div>
+      <div class="fields-grid">
+        <div class="field-wrap">
+          <label>N.° Requisitoria</label>
+          <input id="req-${id}" type="text" value="${esc(data.req)}" placeholder="REQ-001">
+        </div>
+        <div class="field-wrap">
+          <label>Marca</label>
+          <input id="marca-${id}" type="text" value="${esc(data.marca)}" placeholder="Toyota">
+        </div>
+        <div class="field-wrap">
+          <label>Modelo</label>
+          <input id="modelo-${id}" type="text" value="${esc(data.modelo)}" placeholder="Corolla 2022">
+        </div>
+        <div class="field-wrap">
+          <label>Matrícula / Patente</label>
+          <input id="mat-${id}" type="text" value="${esc(data.matricula)}" placeholder="ABC-123" style="text-transform:uppercase">
+        </div>
+        <div class="field-wrap">
+          <label>Color</label>
+          <input id="color-${id}" type="text" value="${esc(data.color)}" placeholder="Ej: Blanco">
+        </div>
+        <div class="field-wrap wide">
+          <label>📍 Lugar del hecho <span style="color:#8B6914;font-weight:400;letter-spacing:0;text-transform:none;font-size:0.65rem;">(completar manualmente)</span></label>
+          <input id="lugar-${id}" type="text" value="" placeholder="Ingresá la dirección o zona donde fue hurtado…" style="border-color:#C9A84C;background:#FFFDF5;">
+        </div>
+      </div>
+    </div>
+ 
+    <div class="photo-zone">
+      <div class="photo-drop" id="drop-${id}" onclick="document.getElementById('fi-${id}').click()">
+        <input type="file" id="fi-${id}" accept="image/*" onchange="setPhoto(event,${id})">
+        <span class="icon">📷</span>
+        <span class="hint">Agregar imagen</span>
+      </div>
+      <button class="photo-clear" id="clr-${id}" onclick="clearPhoto(${id})">✕ Quitar foto</button>
+    </div>
+  `;
+  container.appendChild(div);
+  updateUI();
+}
+ 
+function esc(s){ return (s||'').replace(/"/g,'&quot;'); }
+ 
+/* ── PHOTO ── */
+function setPhoto(e, id) {
+  const file = e.target.files[0]; if (!file) return;
+  const reader = new FileReader();
+  reader.onload = ev => {
+    const r = rows.find(r=>r.id===id);
+    if (r) r.photo = ev.target.result;
+    const drop = document.getElementById(`drop-${id}`);
+    drop.innerHTML = `<img src="${ev.target.result}" alt="foto">`;
+    document.getElementById(`clr-${id}`).classList.add('show');
+  };
+  reader.readAsDataURL(file);
+}
+ 
+function clearPhoto(id) {
+  const r = rows.find(r=>r.id===id); if(r) r.photo = null;
+  document.getElementById(`drop-${id}`).innerHTML = `
+    <input type="file" id="fi-${id}" accept="image/*" onchange="setPhoto(event,${id})">
+    <span class="icon">📷</span><span class="hint">Clic para cargar foto</span>`;
+  document.getElementById(`clr-${id}`).classList.remove('show');
+}
+ 
+/* ── REMOVE ── */
+function removeRow(id) {
+  rows = rows.filter(r=>r.id!==id);
+  document.getElementById(`row-${id}`).remove();
+  renumber();
+  updateUI();
+}
+ 
+function renumber() {
+  rows.forEach((r,i)=>{
+    const el = document.getElementById(`vnum-${r.id}`);
+    if(el) el.textContent = `Vehículo #${i+1}`;
+  });
+}
+ 
+function updateUI() {
+  const n = rows.length;
+  const ctr = document.getElementById('counter');
+  if (n > 0) { ctr.style.display='block'; ctr.textContent=`${n} / 20 vehículo(s)`; }
+  else ctr.style.display='none';
+  document.getElementById('btn-add').disabled = n >= 20;
+}
+ 
+/* ── TOAST ── */
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+ 
+/* ── PDF ── */
+async function generatePDF() {
+  const agente = document.getElementById('agente').value.trim();
+  if (!agente) { toast('⚠ Ingresá el nombre del funcionario'); return; }
+  if (!rows.length) { toast('⚠ Sin vehículos cargados'); return; }
+ 
+  // Collect & validate
+  const data = [];
+  let err = false;
+  for (const r of rows) {
+    const get = id => document.getElementById(id)?.value.trim() || '';
+    const v = {
+      req:      get(`req-${r.id}`),
+      marca:    get(`marca-${r.id}`),
+      modelo:   get(`modelo-${r.id}`),
+      matricula:get(`mat-${r.id}`).toUpperCase(),
+      color:    get(`color-${r.id}`),
+      lugar:    get(`lugar-${r.id}`),
+      photo:    r.photo
+    };
+    const row = document.getElementById(`row-${r.id}`);
+    ['req','marca','modelo','matricula','lugar'].forEach(f=>{
+      const inp = document.getElementById(`${f}-${r.id}`) || document.getElementById(`mat-${r.id}`);
+    });
+    if (!v.req||!v.marca||!v.modelo||!v.matricula||!v.lugar) {
+      document.getElementById(`row-${r.id}`).style.borderColor='#C0392B';
+      err = true;
+    } else {
+      document.getElementById(`row-${r.id}`).style.borderColor='';
+    }
+    data.push(v);
+  }
+  if (err) { toast('⚠ Completá todos los campos requeridos'); return; }
+ 
+  const btn = document.getElementById('btn-pdf');
+  btn.disabled = true; btn.textContent = '⏳ Generando…';
+ 
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+    const PW=210, PH=297, ML=14, MR=14, CW=210-14-14;
+ 
+    const C = {
+      gold:   [201,168,76],
+      gdark:  [139,105,20],
+      black:  [20,14,4],
+      white:  [255,255,255],
+      surf:   [247,243,236],
+      surf2:  [237,231,215],
+      gray:   [100,90,70],
+      red:    [192,57,43]
+    };
+ 
+    const hH = 42; // header height
+ 
+    function header() {
+      // dark strip
+      doc.setFillColor(...C.black);
+      doc.rect(0,0,PW,hH,'F');
+      doc.setDrawColor(...C.gold); doc.setLineWidth(.8);
+      doc.line(0,hH,PW,hH);
+ 
+      // shield
+      doc.addImage('data:image/jpeg;base64,'+SHIELD_PDF,'JPEG',ML,4,30,30);
+ 
+      // text
+      doc.setTextColor(...C.gold);
+      doc.setFont('helvetica','bold'); doc.setFontSize(9);
+      doc.text('DIRECCIÓN NACIONAL DE AVIACIÓN', ML+34, 13);
+      doc.setTextColor(210,175,90);
+      doc.setFont('helvetica','normal'); doc.setFontSize(7.5);
+      doc.text('DE LA POLICÍA NACIONAL', ML+34, 20);
+      doc.setTextColor(160,130,60);
+      doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+      doc.text('DEPARTAMENTO DE OPERACIONES POLICIALES E INFORMACIÓN', ML+34, 27);
+ 
+      // title banner
+      doc.setFillColor(...C.gold);
+      doc.rect(0,hH,PW,13,'F');
+      doc.setTextColor(...C.black);
+      doc.setFont('helvetica','bold'); doc.setFontSize(12);
+      doc.text('HURTO DE VEHÍCULOS DIARIOS', PW/2, hH+9, {align:'center'});
+ 
+      // info bar
+      const iy = hH+14;
+      doc.setFillColor(247,243,236);
+      doc.rect(ML,iy,CW,15,'F');
+      doc.setDrawColor(...C.gold); doc.setLineWidth(.3);
+      doc.rect(ML,iy,CW,15,'S');
+      // left accent
+      doc.setFillColor(...C.gold);
+      doc.rect(ML,iy,3,15,'F');
+ 
+      doc.setTextColor(...C.gdark); doc.setFont('helvetica','bold'); doc.setFontSize(6.5);
+      doc.text('INFORME GENERADO POR:', ML+6, iy+6);
+      doc.setTextColor(20,14,4); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+      doc.text(agente.toUpperCase(), ML+52, iy+6);
+ 
+      doc.setTextColor(...C.gdark); doc.setFont('helvetica','bold'); doc.setFontSize(6.5);
+      doc.text('FECHA:', ML+6, iy+12.5);
+      doc.setTextColor(20,14,4); doc.setFont('helvetica','normal'); doc.setFontSize(8);
+      doc.text(dateLabel.toUpperCase(), ML+22, iy+12.5);
+ 
+      // total badge
+      doc.setFillColor(...C.gdark);
+      doc.roundedRect(PW-MR-52,iy+2.5,50,10,2,2,'F');
+      doc.setTextColor(...C.white); doc.setFont('helvetica','bold'); doc.setFontSize(7);
+      doc.text(`TOTAL: ${data.length} VEH.`, PW-MR-27, iy+9, {align:'center'});
+ 
+      return hH+14+15+4; // starting Y after header
+    }
+ 
+    function footer(page, total) {
+      doc.setFillColor(...C.black);
+      doc.rect(0,PH-11,PW,11,'F');
+      doc.setDrawColor(...C.gold); doc.setLineWidth(.4);
+      doc.line(0,PH-11,PW,PH-11);
+      doc.setTextColor(...C.gold); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+      doc.text('DIRECCIÓN NACIONAL DE AVIACIÓN — POLICÍA NACIONAL', ML, PH-4.5);
+      doc.text(`Página ${page} / ${total}`, PW-MR, PH-4.5, {align:'right'});
+    }
+ 
+    const noPhH = 55;
+    const phH   = 145;
+ 
+    // Simulate layout to calculate total pages
+    let simY = header(), simCnt = 0, simPages = 1;
+    for (const v of data) {
+      const bh = v.photo ? phH : noPhH;
+      if (simCnt >= 2 || simY + bh > PH - 14) {
+        simPages++; simCnt = 0;
+        simY = hH + 14 + 15 + 4;
+      }
+      simY += bh + 5;
+      simCnt++;
+    }
+    const totalPages = simPages;
+ 
+    let page = 1, cnt = 0;
+    let y = header();
+ 
+    for (let i=0; i<data.length; i++) {
+      const v = data[i];
+      const bh = v.photo ? phH : noPhH;
+ 
+      if (cnt >= 2 || y+bh > PH-14) {
+        footer(page, totalPages);
+        doc.addPage(); page++; cnt=0;
+        y = header();
+      }
+ 
+      doc.setFillColor(...(i%2===0 ? [247,243,236] : [237,231,215]));
+      doc.rect(ML,y,CW,bh,'F');
+      doc.setFillColor(...C.gold); doc.rect(ML,y,3.5,bh,'F');
+      doc.setDrawColor(...C.gold); doc.setLineWidth(.4);
+      doc.rect(ML,y,CW,bh,'S');
+ 
+      doc.setFillColor(20,14,4);
+      doc.rect(ML+3.5,y,CW-3.5,12,'F');
+      doc.setTextColor(...C.gold); doc.setFont('helvetica','bold'); doc.setFontSize(8.5);
+      doc.text(`VEHÍCULO N.° ${i+1}`, ML+8, y+8.5);
+ 
+      doc.setFillColor(...C.gold);
+      doc.roundedRect(PW-MR-75,y+2,73,8,1.5,1.5,'F');
+      doc.setTextColor(...C.black); doc.setFont('helvetica','bold'); doc.setFontSize(7);
+      doc.text(`REQUISITORIA: ${v.req}`, PW-MR-38.5, y+7.5, {align:'center'});
+ 
+      const innerX  = ML + 8;
+      const innerW  = CW - 14;
+      const gap     = 4;
+      const hw      = (innerW - gap*2) / 3;
+      const dx = innerX;
+      const dy = y+16;
+      const lh = 11;
+ 
+      function field(label, val, fx, fy, fw) {
+        const fw2 = fw || hw;
+        doc.setFillColor(237,231,215);
+        doc.roundedRect(fx-1, fy-3, fw2+2, 4, 0.5, 0.5, 'F');
+        doc.setTextColor(...C.gdark); doc.setFont('helvetica','bold'); doc.setFontSize(5.8);
+        doc.text(label, fx, fy);
+        doc.setTextColor(20,14,4); doc.setFont('helvetica','normal'); doc.setFontSize(9);
+        const lines = doc.splitTextToSize(val||'—', fw2);
+        doc.text(lines[0], fx, fy+5.5);
+        doc.setDrawColor(...C.gold); doc.setLineWidth(.25);
+        doc.line(fx, fy+6.5, fx+fw2, fy+6.5);
+      }
+ 
+      field('MARCA',           v.marca,      dx,                 dy,     hw);
+      field('MODELO',          v.modelo,     dx+hw+gap,          dy,     hw);
+      field('COLOR',           v.color||'—', dx+(hw+gap)*2,      dy,     hw);
+      field('MATRÍCULA',       v.matricula,  dx,                 dy+lh,  hw);
+      field('LUGAR DEL HECHO', v.lugar,      dx+hw+gap,          dy+lh,  hw*2+gap);
+ 
+      if (v.photo) {
+        const photoTopY = dy + lh*2 + 6;
+        const maxW = innerW;
+        const maxH = bh - (photoTopY - y) - 6;
+        try {
+          let fmt = 'JPEG';
+          if (v.photo.includes('image/png')) fmt='PNG';
+          else if (v.photo.includes('image/webp')) fmt='WEBP';
+ 
+          await new Promise((resolve) => {
+            const tmpImg = new Image();
+            tmpImg.onload = function() {
+              const natW = tmpImg.naturalWidth;
+              const natH = tmpImg.naturalHeight;
+              if (!natW || !natH) { resolve(); return; }
+              const ratio = natW / natH;
+              let drawW, drawH;
+              if (ratio >= maxW / maxH) {
+                drawW = maxW;
+                drawH = maxW / ratio;
+              } else {
+                drawH = maxH;
+                drawW = maxH * ratio;
+              }
+              const cx = innerX + (maxW - drawW) / 2;
+              doc.addImage(v.photo, fmt, cx, photoTopY, drawW, drawH, undefined, 'FAST');
+              doc.setDrawColor(...C.gold); doc.setLineWidth(.3);
+              doc.rect(cx, photoTopY, drawW, drawH, 'S');
+              resolve();
+            };
+            tmpImg.onerror = resolve;
+            tmpImg.src = v.photo;
+          });
+        } catch(e) {}
+      }
+ 
+      y += bh + 5;
+      cnt++;
+    }
+ 
+    footer(page, totalPages);
+    doc.save(`vehiculos_hurtados_${dateFile}.pdf`);
+    toast('✔ PDF generado');
+  } catch(e) {
+    console.error(e);
+    toast('✗ Error generando PDF');
+  }
+  btn.disabled=false; btn.textContent='⬇ Generar PDF';
+}
+</script>
 </body>
 </html>
